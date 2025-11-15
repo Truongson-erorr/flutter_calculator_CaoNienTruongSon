@@ -2,124 +2,120 @@ import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 class CalculatorLogic {
-  String display = "0";
-  String _equation = "";
-  bool _justCalculated = false;
+  String display = "0"; // Current text shown on the calculator screen
+  String _equation = ""; // Full expression being typed
+  bool _justCalculated = false; // True if the last button pressed was "="
+  String _lastExpression = ""; // Stores last full expression before calculation
 
+  // Return last expression and its result as a string
+  String get equationWithResult => "$_lastExpression = $display";
+
+  // Main function: handle any button press
   void onButtonPress(String btn) {
     if (_isNumber(btn) || btn == ".") {
-      _inputNumber(btn);
+      _inputNumber(btn); // If number or decimal
     } else if (_isOperation(btn)) {
-      _inputOperation(btn);
+      _inputOperation(btn); // If operation + - × ÷
     } else {
       switch (btn) {
         case "=":
-          _calculate();
+          _calculate(); // Calculate result
           return;
         case "C":
-          _clearAll();
+          _clear(); // Clear all
           return;
         case "CE":
-          _clearEntry();
+          _clearEnd(); // Delete last character
           return;
         case "±":
-          _toggleSign();
-          return;
+          _toggleSign(); // Change sign of last number
+          break;
         case "%":
-          _percent();
-          return;
+          _percent(); // Convert last number to percentage
+          break;
+        case "( )":
+          _brackets(); // Add brackets
+          break;
       }
     }
   }
 
-  // Nhập số
+  // Add number or decimal point
   void _inputNumber(String number) {
     if (_justCalculated) {
-      _equation = "";
+      _equation = ""; // Reset after calculation
       _justCalculated = false;
     }
 
     if (_equation.isEmpty && number == ".") {
-      _equation = "0.";
+      _equation = "0."; // Start with 0. if user types "."
     } else if (_equation.endsWith(".") && number == ".") {
-      return; // tránh 2 dấu .
+      return; // Prevent double "."
     } else {
-      _equation += number;
+      _equation += number; // Add number to expression
     }
-    display = _equation;
+
+    display = _equation; // Update display
   }
 
-  // Nhập phép toán
+  // Add operation + - × ÷
   void _inputOperation(String op) {
-    if (_equation.isEmpty) {
-      if (op == "-") {
-        _equation = "-";
-        display = _equation;
-      }
-      return;
-    }
+    if (_equation.isEmpty) return;
 
-    String lastChar = _equation[_equation.length - 1];
-
-    if (_isOperation(lastChar)) {
+    // Replace last operator if user presses two in a row
+    if (_isOperation(_equation[_equation.length - 1])) {
       _equation = _equation.substring(0, _equation.length - 1) + op;
     } else {
       _equation += op;
     }
-
     display = _equation;
     _justCalculated = false;
   }
 
+  // Calculate current expression
   void _calculate() {
     if (_equation.isEmpty) return;
+    _lastExpression = _equation; // Store expression for history
 
     try {
+      // Replace symbols for parser
       String exp = _equation.replaceAll('×', '*').replaceAll('÷', '/');
-
-      // Loại bỏ phép toán cuối nếu có
-      while (exp.isNotEmpty && _isOperation(exp[exp.length - 1])) {
-        exp = exp.substring(0, exp.length - 1);
-      }
-
       Parser p = Parser();
       Expression expression = p.parse(exp);
       ContextModel cm = ContextModel();
-      double eval = expression.evaluate(EvaluationType.REAL, cm);
+      double result = expression.evaluate(EvaluationType.REAL, cm);
 
-      if (eval.isInfinite || eval.isNaN) {
-        display = "Error";
-        _equation = "";
-      } else {
-        display = _removeTrailingZero(eval);
-        _equation = display;
-      }
-
-      _justCalculated = true;
+      display = _removeTrailingZero(result); // Remove .0 if needed
+      _equation = display;
+      _justCalculated = true; // Mark calculation done
     } catch (e) {
-      display = "Error";
+      display = "Error"; // Show error if calculation fails
       _equation = "";
       _justCalculated = true;
     }
   }
 
-  void _clearAll() {
+  // Clear all
+  void _clear() {
     display = "0";
     _equation = "";
     _justCalculated = false;
   }
 
-  void _clearEntry() {
-    if (_equation.isEmpty) return;
-
-    _equation = _equation.substring(0, _equation.length - 1);
-    display = _equation.isEmpty ? "0" : _equation;
+  // Delete last character (CE)
+  void _clearEnd() {
+    if (_equation.isNotEmpty) {
+      _equation = _equation.substring(0, _equation.length - 1);
+      display = _equation.isEmpty ? "0" : _equation;
+    } else {
+      display = "0";
+    }
   }
 
+  // Change sign of last number
   void _toggleSign() {
     if (_equation.isEmpty) return;
-
-    RegExp regex = RegExp(r'(-?\d+\.?\d*)$');
+    RegExp regex = RegExp(r'(-?\d+\.?\d*)$'); // Find last number
     Match? match = regex.firstMatch(_equation);
     if (match != null) {
       String number = match.group(0)!;
@@ -128,14 +124,14 @@ class CalculatorLogic {
       } else {
         _equation = _equation.replaceFirst(number, "-$number");
       }
-      display = _equation;
     }
+    display = _equation;
   }
 
+  // Convert last number to percentage
   void _percent() {
     if (_equation.isEmpty) return;
-
-    RegExp regex = RegExp(r'(\d+\.?\d*)$');
+    RegExp regex = RegExp(r'(\d+\.?\d*)$'); // Find last number
     Match? match = regex.firstMatch(_equation);
     if (match != null) {
       double number = double.parse(match.group(0)!);
@@ -146,10 +142,19 @@ class CalculatorLogic {
     }
   }
 
+  // Add brackets ()
+  void _brackets() {
+    _equation += "()";
+    display = _equation;
+  }
+
+  // Check if character is number 0-9
   bool _isNumber(String val) => RegExp(r'^[0-9]$').hasMatch(val);
 
+  // Check if character is operation + - × ÷
   bool _isOperation(String val) => ["+", "-", "×", "÷"].contains(val);
 
+  // Remove trailing .0 if number is integer
   String _removeTrailingZero(double val) {
     if (val == val.toInt()) return val.toInt().toString();
     return val.toString();
