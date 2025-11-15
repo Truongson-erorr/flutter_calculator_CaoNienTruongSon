@@ -60,7 +60,14 @@ class CalculatorLogic {
 
   // Add operation + - × ÷
   void _inputOperation(String op) {
-    if (_equation.isEmpty) return;
+    if (_equation.isEmpty) {
+      // Allow negative numbers at the start
+      if (op == "-") {
+        _equation = "-";
+        display = _equation;
+      }
+      return;
+    }
 
     // Replace last operator if user presses two in a row
     if (_isOperation(_equation[_equation.length - 1])) {
