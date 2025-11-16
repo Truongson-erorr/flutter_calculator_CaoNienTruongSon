@@ -33,7 +33,7 @@
 
 ---
 
-## 📸 Ảnh Minh Họa
+## 📸 Ảnh Minh Họa sau khi chạy trên điện thoại thật
 
 | <img src="https://res.cloudinary.com/dq64aidpx/image/upload/v1763216591/z7228005346896_283a0e41301812e20238f0614cc031e7_tquwhh.jpg" width="200"> | <img src="https://res.cloudinary.com/dq64aidpx/image/upload/v1763216590/z7228005345564_28fa0828436553ae6814f91206be9bb4_fcpiuy.jpg" width="200"> | <img src="https://res.cloudinary.com/dq64aidpx/image/upload/v1763216591/z7228005351744_45a9360c9ff71958a8f9416e9cb7bd47_lgc2iw.jpg" width="200"> |
 |---|---|---|
