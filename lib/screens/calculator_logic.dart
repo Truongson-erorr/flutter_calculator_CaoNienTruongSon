@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 class CalculatorLogic {
@@ -24,9 +23,6 @@ class CalculatorLogic {
         case "C":
           _clear(); // Clear all
           return;
-        case "CE":
-          _clearEnd(); // Delete last character
-          return;
         case "±":
           _toggleSign(); // Change sign of last number
           break;
@@ -34,7 +30,7 @@ class CalculatorLogic {
           _percent(); // Convert last number to percentage
           break;
         case "( )":
-          _brackets(); // Add brackets
+          _brackets(); // Add brackets dynamically
           break;
       }
     }
@@ -109,16 +105,6 @@ class CalculatorLogic {
     _justCalculated = false;
   }
 
-  // Delete last character (CE)
-  void _clearEnd() {
-    if (_equation.isNotEmpty) {
-      _equation = _equation.substring(0, _equation.length - 1);
-      display = _equation.isEmpty ? "0" : _equation;
-    } else {
-      display = "0";
-    }
-  }
-
   // Change sign of last number
   void _toggleSign() {
     if (_equation.isEmpty) return;
@@ -149,9 +135,22 @@ class CalculatorLogic {
     }
   }
 
-  // Add brackets ()
+  // Add brackets dynamically
   void _brackets() {
-    _equation += "()";
+    int openCount = '('.allMatches(_equation).length;
+    int closeCount = ')'.allMatches(_equation).length;
+
+    if (_equation.isEmpty || RegExp(r'[\+\-\×\÷\(]').hasMatch(_equation[_equation.length - 1])) {
+      // Start a new bracket
+      _equation += '(';
+    }else if (openCount > closeCount) {
+      // Close the last open bracket
+      _equation += ')';
+    } else {
+      // Insert multiplication before bracket if needed
+      _equation += '×(';
+    }
+
     display = _equation;
   }
 
