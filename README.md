@@ -99,6 +99,7 @@ lib/
     ├── screen4.jpg
     ├── screen5.jpg
     └── screen6.jpg
+    └── screen7.jpg
 pubspec.yaml                  # File cấu hình Flutter & dependencies
 README.md                     # Mô tả dự án
 .gitignore                    # Ignore các thư mục sinh tự động
